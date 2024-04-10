@@ -5,7 +5,7 @@ import { throttle } from "lodash";
 
 export default function MapPage() {
   const [mapSVGContent, setMapSVGContent] = useState("");
-  const [scaleFactor, setScaleFactor] = useState(1); // Giả sử scale factor là 0.5 (50%)
+  const [scaleFactor, setScaleFactor] = useState(3); // Giả sử scale factor là 0.5 (50%)
 
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -63,8 +63,8 @@ export default function MapPage() {
   };
 
   const zoomIn = () => {
-    if (scaleFactor < 4) {
-      setScaleFactor(Math.min(scaleFactor * 1.1, 4)); // Tăng lên 20%, nhưng không vượt quá 4
+    if (scaleFactor < 100) {
+      setScaleFactor(Math.min(scaleFactor * 1.1, 100)); // Tăng lên 20%, nhưng không vượt quá 4
     }
   };
 
@@ -75,7 +75,7 @@ export default function MapPage() {
   };
 
   return (
-    <div>
+    <div style={{ height: "100vh" }}>
       <div className="title">
         Ha noi map
         <div>
@@ -85,7 +85,10 @@ export default function MapPage() {
           </div>
         </div>
       </div>
-      <div className="map_container" style={{ width: "50%", margin: "auto" }}>
+      <div
+        className="map_container"
+        style={{ width: "100%", margin: "auto", backgroundColor: "aqua" }}
+      >
         {" "}
         {/* Thay đổi kích thước và vị trí của SVG container */}
         <svg

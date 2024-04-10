@@ -79,10 +79,23 @@ export default function Ver2() {
       canvas.removeEventListener("wheel", handleWheel);
     };
   }, []);
+  const zoomIn = () => {
+    if (scaleFactor < 4) {
+      setScaleFactor(Math.min(scaleFactor * 1.1, 4)); // Tăng lên 20%, nhưng không vượt quá 4
+    }
+  };
+
+  const zoomOut = () => {
+    if (scaleFactor > 1) {
+      setScaleFactor(Math.max(scaleFactor * 0, 1)); // Giảm đi 20%, nhưng không nhỏ hơn 1
+    }
+  };
 
   return (
     <div>
-      <div>Ver 2</div>
+      <div>
+        Ver 2<div></div>
+      </div>
       <canvas
         ref={canvasRef}
         width="500"

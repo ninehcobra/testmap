@@ -8,7 +8,12 @@
 }
 
 .map_container {
+  width: 50%;
+  margin: auto;
+  overflow: hidden; /* Ẩn phần bị tràn */
   svg {
+    cursor: move; /* Biến con trỏ thành dấu tay khi hover */
+    user-select: none; /* Ngăn chặn việc chọn văn bản khi kéo */
     g {
       svg {
         g {

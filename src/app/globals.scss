@@ -1,0 +1,26 @@
+.title {
+  width: 100vw;
+  text-align: center;
+  font-weight: bold;
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: blueviolet;
+}
+
+.map_container {
+  svg {
+    g {
+      svg {
+        g {
+          g {
+            path {
+              &:hover {
+                fill: purple !important;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

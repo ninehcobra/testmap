@@ -52,6 +52,20 @@ export default function MapPage() {
     alert("Huyện ba vì");
   };
 
+  const handleClick = (event) => {
+    const svg = event.currentTarget;
+    const point = svg.createSVGPoint();
+    point.x = event.clientX;
+    point.y = event.clientY;
+
+    const globalPoint = point.matrixTransform(svg.getScreenCTM().inverse());
+    const svgCoords = {
+      x: globalPoint.x,
+      y: globalPoint.y,
+    };
+    alert("SVG coordinates:", svgCoords);
+  };
+
   const handleWheel = (event) => {
     if (event.deltaY < 0) {
       // Cuộn lên => zoom in
@@ -87,7 +101,7 @@ export default function MapPage() {
       </div>
       <div
         className="map_container"
-        style={{ width: "100%", margin: "auto", backgroundColor: "aqua" }}
+        style={{ width: "100%", margin: "auto", backgroundColor: "#90DAEE" }}
       >
         {" "}
         {/* Thay đổi kích thước và vị trí của SVG container */}
@@ -103,7 +117,10 @@ export default function MapPage() {
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
         >
-          <g dangerouslySetInnerHTML={{ __html: mapSVGContent }} />
+          <g
+            onClick={handleClick}
+            dangerouslySetInnerHTML={{ __html: mapSVGContent }}
+          />
         </svg>
       </div>
     </div>

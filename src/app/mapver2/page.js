@@ -19,7 +19,10 @@ export default function MapPage() {
   useEffect(() => {
     if (mapSVGContent) {
       let svgElement = document.getElementById("zoom");
-      let panZoom = svgPanZoom(svgElement);
+      let panZoom = svgPanZoom(svgElement, {
+        maxZoom: 100,
+        minZoom: 1,
+      });
     }
   }, [mapSVGContent]);
 

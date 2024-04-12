@@ -100,7 +100,7 @@ export default function Ver2() {
         ref={canvasRef}
         width="500"
         height="500"
-        style={{ border: "1px solid black", cursor: "grab" }}
+        style={{ cursor: "grab" }}
       />
     </div>
   );

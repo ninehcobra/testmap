@@ -8,10 +8,6 @@
   color: blueviolet;
 }
 
-.zoom {
-  border: solid black 1px !important;
-}
-
 .map_container {
   height: 80%;
   margin: auto;
@@ -25,7 +21,8 @@
           g {
             path {
               &:hover {
-                fill: purple !important;
+                stroke: black !important;
+                stroke-width: 1 !important;
               }
             }
           }

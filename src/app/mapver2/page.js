@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import svgPanZoom from "svg-pan-zoom";
 
 export default function MapPage() {
@@ -14,10 +13,10 @@ export default function MapPage() {
     };
 
     fetchMapSVG();
-  });
+  }, []);
 
   useEffect(() => {
-    if (mapSVGContent) {
+    if (mapSVGContent && typeof window !== "undefined") {
       let svgElement = document.getElementById("zoom");
       let panZoom = svgPanZoom(svgElement, {
         maxZoom: 100,

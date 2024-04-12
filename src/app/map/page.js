@@ -1,126 +1,99 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { throttle } from "lodash";
+import React, { useEffect, useState } from "react";
 
 export default function MapPage() {
+  const [scale, setScale] = useState(1);
+  const [panning, setPanning] = useState(false);
+  const [pointX, setPointX] = useState(0);
+  const [pointY, setPointY] = useState(0);
+  const [start, setStart] = useState({ x: 0, y: 0 });
+
   const [mapSVGContent, setMapSVGContent] = useState("");
-  const [scaleFactor, setScaleFactor] = useState(3); // Giả sử scale factor là 0.5 (50%)
-
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [startY, setStartY] = useState(0);
-
-  const handleMouseDown = (event) => {
-    setIsDragging(true);
-    setStartX(event.clientX - event.currentTarget.getBoundingClientRect().left);
-    setStartY(event.clientY - event.currentTarget.getBoundingClientRect().top);
-  };
-
-  const handleMouseMoveThrottled = throttle((event) => {
-    if (!isDragging || !event.currentTarget) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const offsetX = event.clientX - rect.left - startX;
-    const offsetY = event.clientY - rect.top - startY;
-    event.currentTarget.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-  }, 10);
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
 
   useEffect(() => {
+    const zoom = document.getElementById("zoom");
+
+    const setTransform = () => {
+      zoom.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`;
+    };
+
+    const handleMouseDown = (e) => {
+      e.preventDefault();
+      setStart({ x: e.clientX - pointX, y: e.clientY - pointY });
+      setPanning(true);
+    };
+
+    const handleMouseUp = () => {
+      setPanning(false);
+    };
+
+    const handleMouseMove = (e) => {
+      e.preventDefault();
+      if (!panning) return;
+      setPointX(e.clientX - start.x);
+      setPointY(e.clientY - start.y);
+      setTransform();
+    };
+
+    const handleWheel = (e) => {
+      e.preventDefault();
+      var xs = (e.clientX - pointX) / scale;
+      var ys = (e.clientY - pointY) / scale;
+      var delta = e.deltaY > 0 ? -0.1 : 0.1;
+      var newScale = scale + delta;
+      if (newScale <= 18 && newScale >= 1) {
+        setScale(newScale);
+        setPointX(e.clientX - xs * newScale);
+        setPointY(e.clientY - ys * newScale);
+        setTransform();
+      }
+    };
+
+    zoom.addEventListener("mousedown", handleMouseDown);
+    zoom.addEventListener("mouseup", handleMouseUp);
+    zoom.addEventListener("mousemove", handleMouseMove);
+    zoom.addEventListener("wheel", handleWheel);
+
     const fetchMapSVG = async () => {
       const response = await fetch("/Hanoi_blank_map.svg");
       const svgContent = await response.text();
       setMapSVGContent(svgContent);
-      addClickEventToPaths();
     };
 
     fetchMapSVG();
-  }, []);
 
-  const addClickEventToPaths = () => {
-    const path = document.getElementById("g524");
-    console.log(path);
-    if (path) {
-      path.addEventListener("click", handlePathClick); // Gắn sự kiện click vào mỗi phần tử <path>
-    }
-  };
-
-  const handlePathClick = (e) => {
-    alert("Huyện ba vì");
-  };
-
-  const handleClick = (event) => {
-    const svg = event.currentTarget;
-    const point = svg.createSVGPoint();
-    point.x = event.clientX;
-    point.y = event.clientY;
-
-    const globalPoint = point.matrixTransform(svg.getScreenCTM().inverse());
-    const svgCoords = {
-      x: globalPoint.x,
-      y: globalPoint.y,
+    return () => {
+      zoom.removeEventListener("mousedown", handleMouseDown);
+      zoom.removeEventListener("mouseup", handleMouseUp);
+      zoom.removeEventListener("mousemove", handleMouseMove);
+      zoom.removeEventListener("wheel", handleWheel);
     };
-    alert("SVG coordinates:", svgCoords);
-  };
-
-  const handleWheel = (event) => {
-    if (event.deltaY < 0) {
-      // Cuộn lên => zoom in
-      zoomIn();
-    } else {
-      // Cuộn xuống => zoom out
-      zoomOut();
-    }
-  };
-
-  const zoomIn = () => {
-    if (scaleFactor < 100) {
-      setScaleFactor(Math.min(scaleFactor * 1.1, 100)); // Tăng lên 20%, nhưng không vượt quá 4
-    }
-  };
-
-  const zoomOut = () => {
-    if (scaleFactor > 1) {
-      setScaleFactor(Math.max(scaleFactor * 0.9, 1)); // Giảm đi 20%, nhưng không nhỏ hơn 1
-    }
-  };
+  }, [panning, pointX, pointY, scale, start]);
 
   return (
     <div style={{ height: "100vh" }}>
-      <div className="title">
-        Ha noi map
-        <div>
-          <div>
-            <button onClick={zoomIn}>Zoom In</button>
-            <button onClick={zoomOut}>Zoom Out</button>
-          </div>
-        </div>
-      </div>
+      <div className="title">Ha Noi Map</div>
       <div
         className="map_container"
-        style={{ width: "100%", margin: "auto", backgroundColor: "#90DAEE" }}
+        style={{
+          width: "100%",
+          margin: "auto",
+          backgroundColor: "#90DAEE",
+          cursor: panning ? "grabbing" : "grab",
+        }}
       >
-        {" "}
-        {/* Thay đổi kích thước và vị trí của SVG container */}
         <svg
+          id="zoom"
           xmlns="http://www.w3.org/2000/svg"
           width="100%"
           height="auto"
           viewBox="0 0 1000 1000"
-          style={{ transform: `scale(${scaleFactor})` }}
-          onWheel={handleWheel} // Sử dụng transform để scale SVG
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMoveThrottled}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
+          style={{
+            transform: `translate(${pointX}px, ${pointY}px) scale(${scale})`,
+          }}
         >
-          <g
-            onClick={handleClick}
-            dangerouslySetInnerHTML={{ __html: mapSVGContent }}
-          />
+          <g dangerouslySetInnerHTML={{ __html: mapSVGContent }} />
         </svg>
       </div>
     </div>

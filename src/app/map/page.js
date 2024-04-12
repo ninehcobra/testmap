@@ -75,24 +75,39 @@ export default function MapPage() {
         .split(" ")
         .map((s) => parseFloat(s));
 
-      console.log("viewbox", viewBox);
+      console.log("viewboxX", viewboxX);
       if (zoomDirection > 0) {
         scaledViewboxWidth = viewboxWidth / zoomScale;
         scaledViewboxHeight = viewboxHeight / zoomScale;
 
-        scaledViewboxX =
-          viewboxX + (viewboxWidth - scaledViewboxWidth) * zoomLeftFraction;
-        scaledViewboxY =
-          viewboxY + (viewboxHeight - scaledViewboxHeight) * zoomTopFraction;
+        if (
+          !isNaN(scaledViewboxWidth) &&
+          isFinite(scaledViewboxWidth) &&
+          !isNaN(scaledViewboxHeight) &&
+          isFinite(scaledViewboxHeight)
+        ) {
+          scaledViewboxX =
+            viewboxX + (viewboxWidth - scaledViewboxWidth) * zoomLeftFraction;
+          scaledViewboxY =
+            viewboxY + (viewboxHeight - scaledViewboxHeight) * zoomTopFraction;
+        }
       } else {
         scaledViewboxWidth = viewboxWidth * zoomScale;
         scaledViewboxHeight = viewboxHeight * zoomScale;
 
-        scaledViewboxX =
-          viewboxX - (scaledViewboxWidth - viewboxWidth) * zoomLeftFraction;
-        scaledViewboxY =
-          viewboxY - (scaledViewboxHeight - viewboxHeight) * zoomTopFraction;
+        if (
+          !isNaN(scaledViewboxWidth) &&
+          isFinite(scaledViewboxWidth) &&
+          !isNaN(scaledViewboxHeight) &&
+          isFinite(scaledViewboxHeight)
+        ) {
+          scaledViewboxX =
+            viewboxX - (scaledViewboxWidth - viewboxWidth) * zoomLeftFraction;
+          scaledViewboxY =
+            viewboxY - (scaledViewboxHeight - viewboxHeight) * zoomTopFraction;
+        }
       }
+
       const scaledViewbox = [
         scaledViewboxX,
         scaledViewboxY,
@@ -131,7 +146,6 @@ export default function MapPage() {
           width: "100%",
           margin: "auto",
           backgroundColor: "#90DAEE",
-          cursor: panning ? "grabbing" : "grab",
         }}
       >
         <svg
@@ -139,9 +153,6 @@ export default function MapPage() {
           width="100%"
           height="auto"
           viewBox="0 0 1000 1000"
-          style={{
-            transform: `translate(${pointX}px, ${pointY}px) scale(${scale})`,
-          }}
         >
           <g dangerouslySetInnerHTML={{ __html: mapSVGContent }} />
         </svg>

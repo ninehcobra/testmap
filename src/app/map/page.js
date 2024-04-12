@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export default function MapPage() {
   const [scale, setScale] = useState(1);
@@ -8,10 +8,25 @@ export default function MapPage() {
   const [pointX, setPointX] = useState(0);
   const [pointY, setPointY] = useState(0);
   const [start, setStart] = useState({ x: 0, y: 0 });
+  const [svgLoaded, setSvgLoaded] = useState(false);
 
   const [mapSVGContent, setMapSVGContent] = useState("");
 
   useEffect(() => {
+    const fetchMapSVG = async () => {
+      const response = await fetch("/Hanoi_blank_map.svg");
+      const svgContent = await response.text();
+      setMapSVGContent(svgContent);
+      setSvgLoaded(true);
+    };
+
+    fetchMapSVG();
+  });
+
+  useEffect(() => {
+    if (!svgLoaded) {
+      return;
+    }
     const zoom = document.getElementById("zoom");
 
     const setTransform = () => {
@@ -37,17 +52,59 @@ export default function MapPage() {
     };
 
     const handleWheel = (e) => {
-      e.preventDefault();
-      var xs = (e.clientX - pointX) / scale;
-      var ys = (e.clientY - pointY) / scale;
-      var delta = e.deltaY > 0 ? -0.1 : 0.1;
-      var newScale = scale + delta;
-      if (newScale <= 18 && newScale >= 1) {
-        setScale(newScale);
-        setPointX(e.clientX - xs * newScale);
-        setPointY(e.clientY - ys * newScale);
-        setTransform();
+      const zoomScale = 1.1;
+
+      e.stopPropagation();
+      let zoomX = e.offsetX;
+      let zoomY = e.offsetY;
+
+      let zoomDirection = e.deltaY;
+
+      let scaledViewboxWidth;
+      let scaledViewboxHeight;
+      let scaledViewboxX;
+      let scaledViewboxY;
+
+      const zoomElement = document.getElementById("zoom");
+      const viewBox = zoomElement.getAttribute("viewBox");
+
+      let zoomLeftFraction = zoomX / zoomElement.clientWidth;
+      let zoomTopFraction = zoomY / zoomElement.clientHeight;
+
+      let [viewboxX, viewboxY, viewboxWidth, viewboxHeight] = viewBox
+        .split(" ")
+        .map((s) => parseFloat(s));
+
+      console.log("viewbox", viewBox);
+      if (zoomDirection > 0) {
+        scaledViewboxWidth = viewboxWidth / zoomScale;
+        scaledViewboxHeight = viewboxHeight / zoomScale;
+
+        scaledViewboxX =
+          viewboxX + (viewboxWidth - scaledViewboxWidth) * zoomLeftFraction;
+        scaledViewboxY =
+          viewboxY + (viewboxHeight - scaledViewboxHeight) * zoomTopFraction;
+      } else {
+        scaledViewboxWidth = viewboxWidth * zoomScale;
+        scaledViewboxHeight = viewboxHeight * zoomScale;
+
+        scaledViewboxX =
+          viewboxX - (scaledViewboxWidth - viewboxWidth) * zoomLeftFraction;
+        scaledViewboxY =
+          viewboxY - (scaledViewboxHeight - viewboxHeight) * zoomTopFraction;
       }
+      const scaledViewbox = [
+        scaledViewboxX,
+        scaledViewboxY,
+        scaledViewboxWidth,
+        scaledViewboxHeight,
+      ]
+        .map((s) => s.toFixed(2))
+        .join(" ");
+
+      zoomElement.setAttribute("viewBox", scaledViewbox);
+
+      console.log(scaledViewbox);
     };
 
     zoom.addEventListener("mousedown", handleMouseDown);
@@ -55,21 +112,15 @@ export default function MapPage() {
     zoom.addEventListener("mousemove", handleMouseMove);
     zoom.addEventListener("wheel", handleWheel);
 
-    const fetchMapSVG = async () => {
-      const response = await fetch("/Hanoi_blank_map.svg");
-      const svgContent = await response.text();
-      setMapSVGContent(svgContent);
-    };
-
-    fetchMapSVG();
-
     return () => {
       zoom.removeEventListener("mousedown", handleMouseDown);
       zoom.removeEventListener("mouseup", handleMouseUp);
       zoom.removeEventListener("mousemove", handleMouseMove);
       zoom.removeEventListener("wheel", handleWheel);
     };
-  }, [panning, pointX, pointY, scale, start]);
+  }, [panning, pointX, pointY, scale, start, svgLoaded]);
+
+  console.log(panning);
 
   return (
     <div style={{ height: "100vh" }}>
@@ -84,7 +135,6 @@ export default function MapPage() {
         }}
       >
         <svg
-          id="zoom"
           xmlns="http://www.w3.org/2000/svg"
           width="100%"
           height="auto"

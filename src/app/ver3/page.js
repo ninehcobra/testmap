@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import { MapContainer, TileLayer } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
 // Kiểm tra xem có đang chạy trên trình duyệt hay không
 const isBrowser = typeof window !== "undefined";
@@ -21,8 +23,10 @@ export default function Ver3() {
   }
 
   return (
-    <MapContainer center={[10.774, 106.7006]} zoom={8} scrollWheelZoom={true}>
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-    </MapContainer>
+    <div>
+      <MapContainer center={[10.774, 106.7006]} zoom={8} scrollWheelZoom={true}>
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      </MapContainer>
+    </div>
   );
 }

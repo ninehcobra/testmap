@@ -33,7 +33,7 @@ export default function MapPage() {
       //   const panZoomInstance = svgPanZoom.default(svgElement, {
       //     maxZoom: 100,
       //     minZoom: 1,
-      //     dblClickZoomEnabled: false,
+      //     dblClickZoomEnabled: true,
       //     preventMouseEventsDefault: false,
       //   });
       //   setPanZoom(panZoomInstance);
